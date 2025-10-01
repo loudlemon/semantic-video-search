@@ -55,6 +55,48 @@
   background: rgba(20, 20, 40, 0.7); /* Slightly opaque background for readability */
 }
 
+/* Language switcher in top-right */
+.lang-switcher {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 3;
+  display: flex;
+  gap: 8px;
+}
+
+.lang-btn {
+  padding: 6px 10px;
+  border: 1px solid rgba(255,255,255,0.4);
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.35);
+  color: #e0e0e0;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.lang-btn.active {
+  border-color: #00ffff;
+  color: #00ffff;
+  box-shadow: 0 0 10px rgba(0,255,255,0.5);
+}
+
+.flag-icon {
+  width: 16px;
+  height: 16px;
+  object-fit: cover;
+  border-radius: 2px;
+  box-shadow: 0 0 4px rgba(0,0,0,0.5);
+}
+
+.flag-emoji {
+  font-size: 14px;
+  line-height: 1;
+}
+
 /* --- Title --- */
 .app-title {
   font-size: 1.5em; /* Middle size */
