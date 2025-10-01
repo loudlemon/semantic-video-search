@@ -25,7 +25,7 @@ uploaded_video_path = None
 uploaded_image_path = None
 
 
-app.include_router(router, prefix="/api/v1", tags=["Semantic Video Search"])
+app.include_router(router, tags=["Semantic Video Search"])
 
 
 if __name__ == "__main__":

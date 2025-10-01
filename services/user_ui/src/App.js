@@ -2,15 +2,9 @@
 import React, { useState, useMemo } from 'react';
 import './App.css';
 
-// --- Utility for simulating API calls ---
-const simulateApiCall = (endpoint, data) => {
-  console.log(`[API SIM] Request to /${endpoint} with data:`, data);
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({ success: true, message: `Operation successful on ${endpoint}` });
-    }, 1500); // Simulate network latency
-  });
-};
+const API_BASE = process.env.REACT_APP_API_BASE || 'http://localhost:8000';
+
+
 
 
 function App() {
@@ -18,6 +12,9 @@ function App() {
   const [searchTerm, setSearchTerm] = useState('');
   const [status, setStatus] = useState('System initialized. Ready to load assets.');
   const [isSearching, setIsSearching] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const videoInputRef = React.useRef(null);
+  const etalonInputRef = React.useRef(null);
 
   // i18n dictionary
   const dict = useMemo(() => ({
@@ -66,19 +63,43 @@ function App() {
 
   // --- Handlers ---
 
-  const handleFileUpload = async (type) => {
-    const fileName = type === 'video' ? 'TestVideo.mp4' : 'EtalonImage.jpg';
-    updateStatus(t.uploading(type, fileName));
-    
+  const runWithProgress = async (label, fn) => {
+    updateStatus(label);
+    setProgress(10);
+    const timer = setInterval(() => {
+      setProgress((p) => (p < 90 ? p + 5 : p));
+    }, 120);
     try {
-      const result = await simulateApiCall('upload', { file_name: fileName, type });
-      if (result.success) {
-        updateStatus(t.uploadOk(fileName));
-      }
-    } catch (error) {
-      updateStatus(t.uploadErr(type));
-      console.error(error);
+      const res = await fn();
+      setProgress(100);
+      return res;
+    } finally {
+      clearInterval(timer);
+      setTimeout(() => setProgress(0), 600);
     }
+  };
+
+  const handleFileUpload = async (type) => {
+    const inputRef = type === 'video' ? videoInputRef : etalonInputRef;
+    if (!inputRef.current || !inputRef.current.files || inputRef.current.files.length === 0) {
+      updateStatus(t.uploadErr(type));
+      return;
+    }
+    const file = inputRef.current.files[0];
+    const formData = new FormData();
+    const fieldName = type === 'video' ? 'video_file' : 'image_file';
+    formData.append(fieldName, file);
+
+    const endpoint = type === 'video' ? '/upload/video' : '/upload/etalon_image';
+    await runWithProgress(t.uploading(type, file.name), async () => {
+      const resp = await fetch(`${API_BASE}${endpoint}`, { method: 'POST', body: formData });
+      if (!resp.ok) throw new Error('Upload failed');
+      const data = await resp.json();
+      
+      // Use the message returned from the server instead of the client-side template
+      updateStatus(data.message);
+      return data;
+    });
   };
 
   const handleSearch = async () => {
@@ -88,16 +109,17 @@ function App() {
     }
     
     setIsSearching(true);
-    updateStatus(`Executing semantic search for: "${searchTerm}"...`);
-
+    await runWithProgress(t.executing(searchTerm), async () => {
+      const form = new FormData();
+      form.append('query', searchTerm);
+      const resp = await fetch(`${API_BASE}/search`, { method: 'POST', body: form });
+      if (!resp.ok) throw new Error('Search failed');
+      const data = await resp.json();
+      if (data.status === 'success') updateStatus(t.searchOk); else updateStatus(t.searchErr);
+      return data;
+    });
     try {
-      const result = await simulateApiCall('search', { query: searchTerm });
-      if (result.success) {
-        updateStatus(t.searchOk);
-      }
-    } catch (error) {
-      updateStatus(t.searchErr);
-      console.error(error);
+      // no-op
     } finally {
       setIsSearching(false);
     }
@@ -138,16 +160,18 @@ function App() {
 
         {/* 2. Upload Controls (Above Search Bar) */}
         <div className="upload-controls">
+          <input ref={videoInputRef} type="file" accept="video/*" style={{ display: 'none' }} onChange={() => handleFileUpload('video')} />
+          <input ref={etalonInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={() => handleFileUpload('etalon_image')} />
           <button 
             className="menu-button upload-button" 
-            onClick={() => handleFileUpload('video')}
+            onClick={() => videoInputRef.current && videoInputRef.current.click()}
             disabled={isSearching}
           >
             {t.uploadVideo}
           </button>
           <button 
             className="menu-button upload-button" 
-            onClick={() => handleFileUpload('etalon_image')}
+            onClick={() => etalonInputRef.current && etalonInputRef.current.click()}
             disabled={isSearching}
           >
             {t.uploadEtalon}
@@ -182,6 +206,12 @@ function App() {
         <div className="status-bar">
           {t.statusLabel}: {status}
         </div>
+
+        {progress > 0 && (
+          <div className="progress-container">
+            <div className="progress-bar" style={{ width: `${progress}%` }} />
+          </div>
+        )}
 
       </div>
     </div>

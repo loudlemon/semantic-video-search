@@ -6,13 +6,13 @@ import asyncio
 
 router = APIRouter()
 
-@app.get("/")
+@router.get("/")
 async def read_root():
     return {"message": "Backend operational. Use /api/upload or /api/search"}
 
 # --- 1. Upload Endpoints ---
 
-@app.post("/upload/video")
+@router.post("/upload/video")
 async def upload_video(video_file: UploadFile = File(...)):
     global uploaded_video_path
     # In a real app, you would save the file here
@@ -27,14 +27,22 @@ async def upload_video(video_file: UploadFile = File(...)):
         "path": uploaded_video_path
     }
 
-@app.post("/upload/etalon_image")
+@router.post("/upload/etalon_image")
 async def upload_etalon_image(image_file: UploadFile = File(...)):
     global uploaded_image_path
     # In a real app, you would save the file here
-    uploaded_image_path = f"storage/{image_file.filename}"
+    try:
+        uploaded_image_path = f"storage/{image_file.filename}"
     
     # Simulate processing time
-    await asyncio.sleep(1.0) 
+        await asyncio.sleep(1.0)
+
+    except Exception as e:
+        print(f"Failed to upload video: {e}")
+        # If the model is critical for your application to function,
+        # it's better to raise an exception here to prevent the server from starting
+        # in an uninitialized state.
+        raise RuntimeError(f"Critical: Failed to upload video: {e}")
     
     return {
         "status": "success",
@@ -43,7 +51,7 @@ async def upload_etalon_image(image_file: UploadFile = File(...)):
     }
 
 
-@app.post("/search")
+@router.post("/search")
 async def search_semantic(query: str = Form(...)):
     global uploaded_video_path, uploaded_image_path
     
@@ -63,6 +71,3 @@ async def search_semantic(query: str = Form(...)):
         "results_found": results_count,
         "message": f"Found {results_count} semantic matches for '{query}'."
     }
-
-
-router.i
