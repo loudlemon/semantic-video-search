@@ -6,8 +6,12 @@ __pycache__/
 #experiments
 /exploration
 /env*
+
 # C extensions
 *.so
+
+#on-duty scripts
+update*
 
 # Distribution / packaging
 .Python
