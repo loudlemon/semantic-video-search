@@ -5,6 +5,7 @@ __pycache__/
 
 #experiments
 /exploration
+/env*
 # C extensions
 *.so
 
