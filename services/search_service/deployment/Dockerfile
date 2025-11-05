@@ -8,4 +8,4 @@ COPY . ./indexing_service
 ENV PYTHONPATH=/app/src
 
 EXPOSE 8080
-CMD ["python", "-m", "search_service.application.main"]
+CMD ["python", "-m", "search_service.componenets.composites.main"]

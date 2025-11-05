@@ -1,4 +1,3 @@
-# simple manual DI wiring
 from ..infrastructure.embedding.http_embedding_provider import HttpEmbeddingProvider
 from ..infrastructure.vector.qdrant_repository import QdrantVectorRepository
 from ..infrastructure.db.postgres_metadata_repository import PostgresMetadataRepository

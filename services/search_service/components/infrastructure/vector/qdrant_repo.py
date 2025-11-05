@@ -1,6 +1,5 @@
 from typing import List, Optional
 from qdrant_client import QdrantClient
-
 from qdrant_client.http.models import Filter, FieldCondition, MatchValue, NamedVector
 from ...domain.repositories import VectorIndexRepository
 from ...domain.entities import FrameMatch
@@ -18,7 +17,6 @@ class QdrantVectorRepository(VectorIndexRepository):
         if video_id:
             cond = Filter(must=[FieldCondition(key="video_id", match=MatchValue(value=video_id))])
 
-        # Using default vector name; if you use named vectors, adapt NamedVector
         res = self._client.search(
             collection_name=self._collection,
             query_vector=vector,

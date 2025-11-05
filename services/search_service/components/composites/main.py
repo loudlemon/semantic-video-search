@@ -6,7 +6,7 @@ import uvicorn
 
 from ..adapters.controllers.http import router
 from ..adapters import di
-from ..config import Settings
+from ..application.config import Settings
 
 
 def create_app(settings: Settings) -> FastAPI:
