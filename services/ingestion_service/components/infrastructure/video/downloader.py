@@ -1,15 +1,19 @@
-import tempfile
 import os
-from pytube import YouTube
-import requests
+import tempfile
 from urllib.parse import urlparse
+
+import requests
+from pytube import YouTube
 
 
 class SimpleDownloader:
+
     def download(self, url: str) -> str:
         if "youtube.com" in url or "youtu.be" in url:
             yt = YouTube(url)
-            stream = yt.streams.filter(progressive=True, file_extension="mp4").order_by("resolution").desc().first()
+            stream = yt.streams.filter(
+                progressive=True, file_extension="mp4"
+            ).order_by("resolution").desc().first()
             out_dir = tempfile.mkdtemp()
             path = stream.download(output_path=out_dir, filename="video.mp4")
             return path

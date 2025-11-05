@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
-from ..worker import enqueue_ingest
+
+from ingestion_service.components.application.worker import enqueue_ingest
 
 router = APIRouter()
 

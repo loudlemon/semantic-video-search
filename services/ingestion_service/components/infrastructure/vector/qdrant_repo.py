@@ -1,14 +1,18 @@
+import uuid
+
 from qdrant_client import QdrantClient
 from qdrant_client.http.models import PointStruct
-import uuid
 
 
 class QdrantVectorRepository:
+
     def __init__(self, client: QdrantClient, collection: str):
         self._client = client
         self._collection = collection
 
-    def upsert_frame(self, vector, video_id, timestamp_sec, caption, thumbnail_url):
+    def upsert_frame(
+        self, vector, video_id, timestamp_sec, caption, thumbnail_url
+    ):
         point = PointStruct(
             id=str(uuid.uuid4()),
             vector=vector,

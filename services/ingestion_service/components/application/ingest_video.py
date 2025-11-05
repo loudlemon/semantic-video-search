@@ -1,12 +1,19 @@
 import os
 import uuid
+
 from ..domain.interfaces import (
-    VideoDownloader, FrameExtractor, Captioner, Embedder,
-    ObjectStorage, VectorIndexRepository, MetadataRepository
+    Captioner,
+    Embedder,
+    FrameExtractor,
+    MetadataRepository,
+    ObjectStorage,
+    VectorIndexRepository,
+    VideoDownloader,
 )
 
 
 class IngestVideoUseCase:
+
     def __init__(
         self,
         downloader: VideoDownloader,
@@ -33,7 +40,8 @@ class IngestVideoUseCase:
 
         video_path = self._downloader.download(source_url)
         try:
-            for ts, frame_path in self._extractor.extract(video_path, fps=self._fps):
+            for ts, frame_path in self._extractor.extract(video_path,
+                                                          fps=self._fps):
                 caption = self._captioner.caption(frame_path)
                 vec = self._embedder.embed_text(caption)
                 object_key = f"frames/{video_id}/{int(ts*1000)}.jpg"

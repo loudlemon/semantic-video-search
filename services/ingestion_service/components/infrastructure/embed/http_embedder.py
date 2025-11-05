@@ -2,6 +2,7 @@ import requests
 
 
 class HttpEmbedder:
+
     def __init__(self, base_url: str):
         self._base = base_url.rstrip("/")
 
