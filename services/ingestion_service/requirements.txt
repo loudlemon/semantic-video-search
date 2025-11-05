@@ -1,0 +1,14 @@
+fastapi
+uvicorn[standard]
+pydanti
+qdrant-client
+httpx2
+boto3
+minio
+SQLAlchemy
+psycopg2-binary
+celery
+redis
+pytube
+ffmpeg-python
+python-dotenv
