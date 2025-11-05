@@ -1,8 +1,10 @@
+from typing import List, Optional
+
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
-from typing import List, Optional
-from ...application.use_cases.search_frames import SearchFramesUseCase
-from ...domain.entities import SearchQuery, FrameMatch
+
+from ...application.search_frames import SearchFramesUseCase
+from ...domain.entities import FrameMatch, SearchQuery
 
 
 class FrameMatchDTO(BaseModel):
@@ -29,7 +31,9 @@ def get_use_case() -> SearchFramesUseCase:
 
 
 @router.post("/search", response_model=List[FrameMatchDTO])
-async def search_endpoint(req: SearchRequest, uc: SearchFramesUseCase = Depends(get_use_case)):
+async def search_endpoint(
+    req: SearchRequest, uc: SearchFramesUseCase = Depends(get_use_case)
+):
     query = SearchQuery(text=req.text, video_id=req.video_id, top_k=req.top_k)
     results: List[FrameMatch] = await uc.execute(query)
     return [FrameMatchDTO(**vars(m)) for m in results]

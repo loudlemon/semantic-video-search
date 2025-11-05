@@ -7,9 +7,8 @@ build-backend = "setuptools.build_meta"
 
 [tool.isort]
 profile = "black"
-known_first_party = "rag"
-known_evraz = "evraz"
-sections=["FUTURE", "STDLIB", "THIRDPARTY", "EVRAZ", "FIRSTPARTY", "LOCALFOLDER"]
+known_first_party = "semantic_video_search"
+sections=["FUTURE", "STDLIB", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
 line_length = 80
 
 [tool.yapf]

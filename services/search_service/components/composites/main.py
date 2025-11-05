@@ -1,24 +1,33 @@
 import asyncio
 import signal
-from fastapi import FastAPI
+from contextlib import asynccontextmanager
+
 import uvicorn
+from fastapi import FastAPI
 
-
-from ..adapters.controllers.http import router
 from ..adapters import di
+from ..adapters.controllers.https import router
 from ..application.config import Settings
 
 
-def create_app(settings: Settings) -> FastAPI:
-    app = FastAPI(title="Semantic Video Search Service", version="0.1.0")
-    @app.on_event("startup")
-    async def on_startup():
-        di.container = di.Container(settings)
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    print("Application startup: Loading...")
+    di.container = di.Container(settings)
+    yield    # Application can now accept requests
 
-    @app.on_event("shutdown")
-    async def on_shutdown():
-        if di.container:
-            await di.container.aclose()
+    # Shutdown events: Clean up resources
+    print("Application shutdown: Unloading...")
+    if di.container:
+        await di.container.aclose()
+
+
+def create_app(lifespan) -> FastAPI:
+    app = FastAPI(
+        title="Semantic Video Search Service",
+        version="0.1.0",
+        lifespan=lifespan
+    )
 
     app.include_router(router, prefix="/v1")
     return app
@@ -26,5 +35,5 @@ def create_app(settings: Settings) -> FastAPI:
 
 if __name__ == "__main__":
     settings = Settings()
-    app = create_app(settings)
+    app = create_app(lifespan)
     uvicorn.run(app, host=settings.host, port=settings.port)

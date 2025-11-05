@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Optional, List
+from typing import List, Optional
 
 
 @dataclass(frozen=True)
@@ -8,7 +8,7 @@ class FrameMatch:
     timestamp_sec: float
     caption: Optional[str]
     thumbnail_url: Optional[str]
-    score: float  # similarity score (the higher the better)
+    score: float    # similarity score (the higher the better)
 
 
 @dataclass(frozen=True)

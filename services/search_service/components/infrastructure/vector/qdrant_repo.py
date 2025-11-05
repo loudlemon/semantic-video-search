@@ -1,21 +1,38 @@
 from typing import List, Optional
+
 from qdrant_client import QdrantClient
-from qdrant_client.http.models import Filter, FieldCondition, MatchValue, NamedVector
-from ...domain.repositories import VectorIndexRepository
+from qdrant_client.http.models import (
+    FieldCondition,
+    Filter,
+    MatchValue,
+    NamedVector,
+)
+
 from ...domain.entities import FrameMatch
+from ...domain.repositories import VectorIndexRepository
 
 
 class QdrantVectorRepository(VectorIndexRepository):
+
     def __init__(self, client: QdrantClient, collection_name: str):
         self._client = client
         self._collection = collection_name
 
     async def search_by_embedding(
-        self, vector: list[float], top_k: int, video_id: Optional[str] = None
+        self,
+        vector: list[float],
+        top_k: int,
+        video_id: Optional[str] = None
     ) -> List[FrameMatch]:
         cond = None
         if video_id:
-            cond = Filter(must=[FieldCondition(key="video_id", match=MatchValue(value=video_id))])
+            cond = Filter(
+                must=[
+                    FieldCondition(
+                        key="video_id", match=MatchValue(value=video_id)
+                    )
+                ]
+            )
 
         res = self._client.search(
             collection_name=self._collection,

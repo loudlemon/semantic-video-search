@@ -1,9 +1,15 @@
 from typing import List
-from ..domain.entities import SearchQuery, FrameMatch
-from ..domain.repositories import EmbeddingProvider, VectorIndexRepository, MetadataRepository
+
+from ..domain.entities import FrameMatch, SearchQuery
+from ..domain.repositories import (
+    EmbeddingProvider,
+    MetadataRepository,
+    VectorIndexRepository,
+)
 
 
 class SearchFramesUseCase:
+
     def __init__(
         self,
         embedder: EmbeddingProvider,

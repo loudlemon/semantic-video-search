@@ -1,13 +1,17 @@
-from ..infrastructure.embedding.http_embedding_provider import HttpEmbeddingProvider
-from ..infrastructure.vector.qdrant_repository import QdrantVectorRepository
-from ..infrastructure.db.postgres_metadata_repository import PostgresMetadataRepository
-from ..application.use_cases.search_frames import SearchFramesUseCase
-from ..config import Settings
 import httpx
 from qdrant_client import QdrantClient
 
+from ..application.config import Settings
+from ..application.search_frames import SearchFramesUseCase
+from ..infrastructure.db.postgres_metadata_repo import (
+    PostgresMetadataRepository,
+)
+from ..infrastructure.embedding.http_embed_provider import HttpEmbeddingProvider
+from ..infrastructure.vector.qdrant_repo import QdrantVectorRepository
+
 
 class Container:
+
     def __init__(self, settings: Settings):
         self.settings = settings
         self.http_client = httpx.AsyncClient(timeout=20.0, base_url="")
@@ -23,7 +27,9 @@ class Container:
             client=self.qdrant,
             collection_name=settings.qdrant_collection,
         )
-        self.metadata_repo = PostgresMetadataRepository(dsn=settings.postgres_dsn)
+        self.metadata_repo = PostgresMetadataRepository(
+            dsn=settings.postgres_dsn
+        )
         self.search_use_case = SearchFramesUseCase(
             embedder=self.embedder,
             vector_repo=self.vector_repo,

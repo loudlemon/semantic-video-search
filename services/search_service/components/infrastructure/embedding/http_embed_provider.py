@@ -1,8 +1,10 @@
 import httpx
+
 from ...domain.repositories import EmbeddingProvider
 
 
 class HttpEmbeddingProvider(EmbeddingProvider):
+
     def __init__(self, base_url: str, client: httpx.AsyncClient):
         self._base_url = base_url.rstrip("/")
         self._client = client
