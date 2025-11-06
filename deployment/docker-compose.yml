@@ -1,0 +1,106 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: semvid
+    ports: ["5432:5432"]
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  qdrant:
+    image: qdrant/qdrant:v1.8.3
+    ports: ["6333:6333"]
+    volumes:
+      - qdrant_storage:/qdrant/storage
+
+  minio:
+    image: minio/minio:RELEASE.2024-09-22T00-33-43Z
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+
+  redis:
+    image: redis:7
+    ports: ["6379:6379"]
+
+  embedding-service:
+    build: ./services/embedding-service
+    ports: ["8000:8000"]
+
+  captioning-service:
+    build: ./services/captioning-service
+    ports: ["8002:8002"]
+
+  ingestion-service-api:
+    build: ./services/ingestion-service
+    environment:
+      EMBEDDING_BASE_URL: http://embedding-service:8000
+      CAPTION_BASE_URL: http://captioning-service:8002
+      QDRANT_URL: http://qdrant:6333
+      QDRANT_COLLECTION: frames
+      MINIO_ENDPOINT: minio:9000
+      MINIO_ACCESS_KEY: minioadmin
+      MINIO_SECRET_KEY: minioadmin
+      MINIO_BUCKET: thumbnails
+      MINIO_SECURE: "false"
+      REDIS_URL: redis://redis:6379/0
+      POSTGRES_DSN: postgresql://postgres:postgres@postgres:5432/semvid
+    depends_on:
+      - embedding-service
+      - captioning-service
+      - qdrant
+      - minio
+      - redis
+      - postgres
+    ports: ["8001:8001"]
+
+  ingestion-worker:
+    build: ./services/ingestion-service
+    command: ["celery", "-A", "ingestion_service.worker.celery_app", "worker", "--loglevel=INFO", "-Q", "celery"]
+    environment:
+      EMBEDDING_BASE_URL: http://embedding-service:8000
+      CAPTION_BASE_URL: http://captioning-service:8002
+      QDRANT_URL: http://qdrant:6333
+      QDRANT_COLLECTION: frames
+      MINIO_ENDPOINT: minio:9000
+      MINIO_ACCESS_KEY: minioadmin
+      MINIO_SECRET_KEY: minioadmin
+      MINIO_BUCKET: thumbnails
+      MINIO_SECURE: "false"
+      REDIS_URL: redis://redis:6379/0
+      POSTGRES_DSN: postgresql://postgres:postgres@postgres:5432/semvid
+    depends_on:
+      - embedding-service
+      - captioning-service
+      - qdrant
+      - minio
+      - redis
+      - postgres
+
+  search-service:
+    build: ./services/search-service
+    environment:
+      EMBEDDING_BASE_URL: http://embedding-service:8000
+      QDRANT_URL: http://qdrant:6333
+      QDRANT_COLLECTION: frames
+      POSTGRES_DSN: postgresql://postgres:postgres@postgres:5432/semvid
+    depends_on:
+      - embedding-service
+      - qdrant
+      - postgres
+    ports: ["8080:8080"]
+
+volumes:
+  pgdata:
+  qdrant_storage:
+  minio_data:
