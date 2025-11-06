@@ -8,7 +8,8 @@ Semantic Video Search Engine (In Development)
 
 ✨ Ключевые Технологии
 
-* Backend: Python (FastAPI), React
+* Backend: Python (FastAPI)
+* Frontend: React
 * AI/ML: Sentence Transformers, CLIP, BLIP
 * Архитектура: Микросервисы, Гексагональная архитектура (Ports & Adapters)
 * Реляционная база данных: Postgres 
