@@ -1,0 +1,20 @@
+import shutil
+import uuid
+from pathlib import Path
+from fastapi import FastAPI, UploadFile, File
+
+app = FastAPI(title="Video Insight MVP (UV Edition)")
+
+# Storage path (relative to container root)
+UPLOAD_DIR = Path("/app/data/videos")
+UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+
+@app.post("/upload")
+async def upload_video(file: UploadFile = File(...)):
+    file_id = str(uuid.uuid4())
+    file_path = UPLOAD_DIR / f"{file_id}_{file.filename}"
+    
+    with file_path.open("wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+    
+    return {"file_id": file_id, "status": "uploaded"}
