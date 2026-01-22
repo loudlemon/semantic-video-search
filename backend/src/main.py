@@ -18,3 +18,9 @@ async def upload_video(file: UploadFile = File(...)):
         shutil.copyfileobj(file.file, buffer)
     
     return {"file_id": file_id, "status": "uploaded"}
+
+
+@app.get("/health")
+async def health_check():
+    """Returns 200 OK if the service is running"""
+    return {"status": "ok", "service": "video-analyzer"}
