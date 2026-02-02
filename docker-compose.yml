@@ -1,9 +1,15 @@
 services:
-  api:
+  backend:
     build: ./backend
-    ports:
-      - "8000:8000"
+    # Порт 8000 наружу можно даже не прокидывать, Nginx достучится до него внутри сети
     volumes:
-      - ./data:/app/data
+      - ./backend/data:/app/data
     environment:
-      - PYTHONUNBUFFERED=1
+      - UPLOAD_DIR=data
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
